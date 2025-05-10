@@ -1,0 +1,25 @@
+services:
+  frontend:
+    container_name: frontend-recode
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+#    environment:
+#      ENV_VARIABLE: ${ENV_VARIABLE}
+#      NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    restart: always
+    ports:
+      - 3000:3000
+  backend:
+    container_name: backend-recode
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    restart: always
