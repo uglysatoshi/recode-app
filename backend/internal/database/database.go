@@ -38,14 +38,8 @@ func New(cfg *config.Config) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) SaveUser(username, email, password string) (uint, error) {
+func (s *Storage) SaveUser(user models.User) (uint, error) {
 	const op = "storage.postgres.SaveUser"
-
-	user := models.User{
-		Username: username,
-		Email:    email,
-		Password: password,
-	}
 
 	result := s.db.Create(&user)
 	if result.Error != nil {

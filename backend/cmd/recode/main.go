@@ -4,6 +4,7 @@ import (
 	"backend/internal/config"
 	"backend/internal/database"
 	"backend/internal/http-server/handlers/user/get"
+	"backend/internal/http-server/handlers/user/save"
 	"backend/internal/http-server/middleware/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -63,6 +64,7 @@ func main() {
 			cfg.HTTPServer.User: cfg.HTTPServer.Password,
 		}))
 		r.Get("/", get.New(log, db))
+		r.Post("/", save.New(log, db))
 	})
 
 	if err := srv.ListenAndServe(); err != nil {

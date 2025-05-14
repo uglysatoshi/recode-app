@@ -7,7 +7,7 @@ services:
       context: frontend
       dockerfile: Dockerfile
     env_file:
-      - ./frontend/.env
+      - frontend/.env.local
     volumes:
       - ./frontend/src:/usr/src/app/src
       - ./frontend/public:/usr/src/app/public
