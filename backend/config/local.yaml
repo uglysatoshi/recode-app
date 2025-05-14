@@ -1,7 +1,16 @@
 env: "local"
+
 http_server:
   address: "0.0.0.0:8080"
   timeout: 4s
   idle_timeout: 60s
   user: "user"
   password: "password"
+
+db:
+  host: "db"
+  port: "5432"
+  user: "recode_user"
+  password: "recode_pass"
+  name: "recode_db"
+  sslmode: "disable"

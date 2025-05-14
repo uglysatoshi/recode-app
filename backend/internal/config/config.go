@@ -11,6 +11,14 @@ import (
 type Config struct {
 	Env        string `yaml:"env" env-default:"local"`
 	HTTPServer `yaml:"http_server"`
+	DB         struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Name     string `yaml:"name"`
+		SSLMode  string `yaml:"sslmode"`
+	} `yaml:"db"`
 }
 
 type HTTPServer struct {

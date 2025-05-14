@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/internal/config"
+	"backend/internal/database"
 	"backend/internal/http-server/handlers/hello"
 	"backend/internal/http-server/middleware/logger"
 	"github.com/go-chi/chi/v5"
@@ -23,6 +24,12 @@ func main() {
 	cfg := config.MustLoad()
 
 	log := setupLogger(cfg.Env)
+
+	_, err := database.New(cfg)
+
+	if err != nil {
+		log.Error("Failed to connect to database")
+	}
 
 	log.Info("Starting recode-app", slog.String("env", cfg.Env))
 
