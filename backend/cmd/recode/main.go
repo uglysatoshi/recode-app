@@ -3,7 +3,7 @@ package main
 import (
 	"backend/internal/config"
 	"backend/internal/database"
-	"backend/internal/http-server/handlers/hello"
+	"backend/internal/http-server/handlers/user/get"
 	"backend/internal/http-server/middleware/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -25,7 +25,7 @@ func main() {
 
 	log := setupLogger(cfg.Env)
 
-	_, err := database.New(cfg)
+	db, err := database.New(cfg)
 
 	if err != nil {
 		log.Error("Failed to connect to database")
@@ -58,7 +58,12 @@ func main() {
 		IdleTimeout:  cfg.IdleTimeout,
 	}
 
-	router.Get("/hello", hello.HelloHandler(log))
+	router.Route("/user", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("backend", map[string]string{
+			cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		}))
+		r.Get("/", get.New(log, db))
+	})
 
 	if err := srv.ListenAndServe(); err != nil {
 		log.Error("Failed to start server")

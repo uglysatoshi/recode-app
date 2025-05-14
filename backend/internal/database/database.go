@@ -2,7 +2,7 @@ package database
 
 import (
 	"backend/internal/config"
-	"backend/models"
+	"backend/internal/models"
 	"errors"
 	"fmt"
 	"gorm.io/driver/postgres"
@@ -71,4 +71,15 @@ func (s *Storage) GetUserByEmail(email string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (s *Storage) GetAllUsers() ([]models.User, error) {
+	const op = "storage.postgres.GetAllUsers"
+
+	var users []models.User
+	if err := s.db.Find(&users).Error; err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return users, nil
 }
