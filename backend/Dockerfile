@@ -6,16 +6,18 @@ WORKDIR /app
 # Устанавливаем air (live-reload)
 RUN go install github.com/air-verse/air@latest
 
-# Копируем go.mod и go.sum, чтобы закешировать зависимости
+# Копируем go.mod и go.sum, чтобы перенести зависимости
 COPY go.mod go.sum ./
 
+# Устанавливаем зависимости
 RUN go mod download
 
-# Копируем все оставшиеся файлы
+# Копируем все оставшиеся файлы директории
 COPY . .
 
 # Открываем порт
 EXPOSE 8080
 
-# Запускаем air с конфигом
+# Запускаем air с конфигурационным файлом
 CMD ["air", "-c", ".air.toml"]
+
