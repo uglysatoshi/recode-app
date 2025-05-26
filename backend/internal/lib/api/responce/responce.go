@@ -11,6 +11,11 @@ type Response struct {
 	Error  string `json:"error,omitempty"`
 }
 
+type DataResponse struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
+}
+
 const (
 	StatusOK    = "OK"
 	StatusError = "Error"
@@ -26,6 +31,13 @@ func Error(msg string) Response {
 	return Response{
 		Status: StatusError,
 		Error:  msg,
+	}
+}
+
+func Data(data interface{}) DataResponse {
+	return DataResponse{
+		Status: "OK",
+		Data:   data,
 	}
 }
 

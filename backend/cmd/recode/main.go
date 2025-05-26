@@ -4,8 +4,19 @@ import (
 	"backend/internal/auth"
 	"backend/internal/config"
 	"backend/internal/database"
+	projectCreate "backend/internal/http-server/handlers/project/create"
+	projectDelete "backend/internal/http-server/handlers/project/delete"
+	projectGetByUser "backend/internal/http-server/handlers/project/get_by_user"
+	projectUpdate "backend/internal/http-server/handlers/project/update"
+	taskCreate "backend/internal/http-server/handlers/task/create"
+	taskDelete "backend/internal/http-server/handlers/task/delete"
+	taskGetByProject "backend/internal/http-server/handlers/task/get_by_project"
+	taskGetByUser "backend/internal/http-server/handlers/task/get_by_user"
+	taskUpdate "backend/internal/http-server/handlers/task/update"
 	"backend/internal/http-server/handlers/user/login"
+	"backend/internal/http-server/handlers/user/me"
 	"backend/internal/http-server/handlers/user/register"
+	"backend/internal/http-server/middleware/jwt"
 	"backend/internal/http-server/middleware/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -64,15 +75,30 @@ func main() {
 		IdleTimeout:  cfg.IdleTimeout,
 	}
 
-	router.Route("/api/user", func(r chi.Router) {
+	router.Route("/api", func(r chi.Router) {
+		// Открытые маршруты
 		r.Post("/login", login.New(log, db))
 		r.Post("/register", register.New(log, db))
 
 		// Защищённые маршруты
 		r.Group(func(protected chi.Router) {
-			protected.Use(auth.Verifier())
-			protected.Use(auth.Authenticator())
-			// TODO: me, projects, tasks
+			protected.Use(jwt.Verifier())
+			protected.Use(jwt.Authenticator())
+
+			protected.Get("/me", me.New(log, db))
+
+			// Проекты
+			protected.Post("/projects", projectCreate.New(log, db))
+			protected.Put("/projects/{id}", projectUpdate.New(log, db))
+			protected.Delete("/projects/{id}", projectDelete.New(log, db))
+			protected.Get("/projects", projectGetByUser.New(log, db))
+
+			// Задачи
+			protected.Post("/tasks", taskCreate.New(log, db))
+			protected.Put("/tasks/{id}", taskUpdate.New(log, db))
+			protected.Delete("/tasks/{id}", taskDelete.New(log, db))
+			protected.Get("/tasks", taskGetByUser.New(log, db))
+			protected.Get("/projects/{id}/tasks", taskGetByProject.New(log, db))
 		})
 	})
 

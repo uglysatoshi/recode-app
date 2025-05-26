@@ -1,6 +1,7 @@
-package auth
+package jwt
 
 import (
+	"backend/internal/auth"
 	"errors"
 	"github.com/go-chi/jwtauth"
 	"net/http"
@@ -11,7 +12,7 @@ type contextKey string
 const userCtxKey = contextKey("user_id")
 
 func Verifier() func(http.Handler) http.Handler {
-	return jwtauth.Verifier(TokenAuth)
+	return jwtauth.Verifier(auth.TokenAuth)
 }
 
 func Authenticator() func(http.Handler) http.Handler {
