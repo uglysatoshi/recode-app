@@ -1,10 +1,11 @@
 package main
 
 import (
+	"backend/internal/auth"
 	"backend/internal/config"
 	"backend/internal/database"
-	"backend/internal/http-server/handlers/user/get"
-	"backend/internal/http-server/handlers/user/save"
+	"backend/internal/http-server/handlers/user/login"
+	"backend/internal/http-server/handlers/user/register"
 	"backend/internal/http-server/middleware/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,6 +29,8 @@ func main() {
 
 	db, err := database.New(cfg)
 
+	auth.InitJWT()
+
 	if err != nil {
 		log.Error("Failed to connect to database")
 	}
@@ -35,12 +38,14 @@ func main() {
 	log.Info("Starting recode-app", slog.String("env", cfg.Env))
 
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.RealIP)
-	router.Use(middleware.Logger)
+
+	router.Use(middleware.RequestID) // Добавляет уникальный ID для каждого запроса
+	router.Use(middleware.RealIP)    // Определяет реальный IP-адрес клиента
+	router.Use(middleware.Logger)    // Стандартное логгирование запросов
+	router.Use(middleware.Recoverer) // Обработка паник и восстановление работы
+	router.Use(middleware.URLFormat) // Парсинг URL-параметров
 	router.Use(logger.New(log))
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.URLFormat)
+
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -59,12 +64,16 @@ func main() {
 		IdleTimeout:  cfg.IdleTimeout,
 	}
 
-	router.Route("/user", func(r chi.Router) {
-		r.Use(middleware.BasicAuth("backend", map[string]string{
-			cfg.HTTPServer.User: cfg.HTTPServer.Password,
-		}))
-		r.Get("/", get.New(log, db))
-		r.Post("/", save.New(log, db))
+	router.Route("/api/user", func(r chi.Router) {
+		r.Post("/login", login.New(log, db))
+		r.Post("/register", register.New(log, db))
+
+		// Защищённые маршруты
+		r.Group(func(protected chi.Router) {
+			protected.Use(auth.Verifier())
+			protected.Use(auth.Authenticator())
+			// TODO: me, projects, tasks
+		})
 	})
 
 	if err := srv.ListenAndServe(); err != nil {

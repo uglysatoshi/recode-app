@@ -31,19 +31,23 @@ func New(cfg *config.Config) (*Storage, error) {
 		return nil, fmt.Errorf("%s: failed to connect to DB: %w", op, err)
 	}
 
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.User{},
+		&models.Task{},
+		&models.Project{},
+	); err != nil {
 		return nil, fmt.Errorf("%s: migration failed: %w", op, err)
 	}
 
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) SaveUser(user models.User) (uint, error) {
+func (s *Storage) CreateUser(user models.User) (uint, error) {
 	const op = "storage.postgres.SaveUser"
 
 	result := s.db.Create(&user)
 	if result.Error != nil {
-		// Можно добавить проверку на дубликаты email, username, и вернуть кастомную ошибку
+		// TODO: Можно добавить проверку на дубликаты email, username
 		return 0, fmt.Errorf("%s: failed to create user: %w", op, result.Error)
 	}
 
