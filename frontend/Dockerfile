@@ -1,6 +1,6 @@
 FROM node:24-slim
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY ./package.json .
 COPY ./package-lock.json .
@@ -12,5 +12,3 @@ COPY .. .
 EXPOSE 3000
 
 CMD ["npm", "run", "dev"]
-
-
